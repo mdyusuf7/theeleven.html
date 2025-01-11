@@ -1,87 +1,111 @@
-r<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Server Maintenance</title>
+    <title>Maintenance Page</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
             font-family: Arial, sans-serif;
-            text-align: center;
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
-            color: #fff;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            justify-content: center;
+            text-align: center;
+            color: #333;
         }
         h1 {
             font-size: 3rem;
-            margin-bottom: 20px;
+            margin-bottom: 1rem;
         }
         p {
             font-size: 1.5rem;
-            margin-bottom: 10px;
+            margin-bottom: 2rem;
         }
-        .countdown {
-            font-size: 2.5rem;
-            margin: 20px 0;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 20px;
-            border-radius: 10px;
+        .clock {
+            font-size: 2rem;
+            font-weight: bold;
         }
         .ray-id {
             font-size: 1.2rem;
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 15px;
-            border-radius: 8px;
-            color: #000;
+            margin-top: 1rem;
+            color: #555;
         }
         footer {
-            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background-color: #f1f1f1;
+            color: #333;
             font-size: 1rem;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
-    <h1>🌐 Server Under Maintenance</h1>
-    <p>We are currently performing maintenance. We'll be back by:</p>
-    <div class="countdown" id="countdown">System Calculating...</div>
-    <p>Thank you for your patience.</p>
-    <div class="ray-id" id="ray-id">Ray ID: Generating...</div>
-    <footer>&copy; 2025 Yusserver</footer>
+    <h1>We'll be back soon!</h1>
+    <p>Our website is under maintenance until <strong>Monday 9:00 AM</strong>.</p>
+    <div class="clock" id="countdown"></div>
+    <div class="ray-id" id="ray-id">Ray ID: Loading...</div>
+
+    <footer id="footer">
+        Loading your IP and ISP details...
+    </footer>
 
     <script>
-        // Countdown Timer 
+        // Countdown Timer
         function updateCountdown() {
-            const targetDate = new Date();
-            targetDate.setHours(9, 0, 0, 0); // 9 AM
-            const today = new Date();
-            const daysToMonday = (8 - today.getDay()) % 7; // Calculate days until Monday
-            targetDate.setDate(today.getDate() + daysToMonday);
+            const deadline = new Date();
+            deadline.setDate(deadline.getDate() + ((1 + 7 - deadline.getDay()) % 7)); // Set to next Monday
+            deadline.setHours(9, 0, 0, 0);
 
-            const diff = targetDate - today;
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            const now = new Date();
+            const diff = deadline - now;
 
-            document.getElementById("countdown").textContent =
-                `${daysToMonday} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+            if (diff > 0) {
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / (1000 * 60)) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+                document.getElementById("countdown").innerText = `Time Left: ${hours}h ${minutes}m ${seconds}s`;
+            } else {
+                document.getElementById("countdown").innerText = "The website is back online!";
+            }
         }
+
         setInterval(updateCountdown, 1000);
 
-        // Generate Random Ray ID
-        function generateRayId() {
-            const rayId = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join('');
-            document.getElementById("ray-id").textContent = `Ray ID: ${rayId}`;
+        // Random Ray ID Generator
+        function generateRayID() {
+            const rayID = Math.random().toString(36).substring(2, 14).toUpperCase();
+            document.getElementById("ray-id").innerText = `Ray ID: ${rayID}`;
         }
-        generateRayId();
+
+        generateRayID();
+        setInterval(generateRayID, 1000);
+
+        // Fetch IP and ISP Details
+        async function fetchIPDetails() {
+            try {
+                const response = await fetch("https://ipinfo.io/json?token=bf4a967c47cee6"); // Replace with your token
+                if (!response.ok) {
+                    throw new Error("Failed to fetch IP details.");
+                }
+                const data = await response.json();
+                const { ip, org } = data; // Extract IP and organization (ISP)
+                const footer = document.getElementById("footer");
+                footer.innerHTML = `Your IP: ${ip} | ISP: ${org}`;
+            } catch (error) {
+                console.error(error);
+                document.getElementById("footer").innerText = "Unable to fetch IP and ISP details.";
+            }
+        }
+
+        fetchIPDetails();
     </script>
 </body>
 </html>
